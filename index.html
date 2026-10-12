@@ -833,12 +833,12 @@
     --glass-hi: inset 0 1px 0 rgba(255,255,255,0.55);
     --glass-shadow: 0 4px 18px rgba(80,45,20,0.10);
     --glass-shadow-hover: 0 10px 26px rgba(80,45,20,0.16);
-    --amb-1: color-mix(in srgb, var(--primary) 20%, transparent);
-    --amb-2: color-mix(in srgb, #C79B66 30%, transparent);
+    --amb-1: color-mix(in srgb, var(--primary) 30%, transparent);
+    --amb-2: color-mix(in srgb, #C79B66 52%, transparent);
     --ambient:
-      radial-gradient(720px 440px at 4% -4%, var(--amb-1), transparent 70%),
-      radial-gradient(660px 440px at 100% 14%, var(--amb-2), transparent 70%),
-      radial-gradient(720px 520px at 40% 108%, var(--amb-1), transparent 72%);
+      radial-gradient(760px 480px at 4% -4%, var(--amb-1), transparent 70%),
+      radial-gradient(700px 480px at 100% 14%, var(--amb-2), transparent 70%),
+      radial-gradient(760px 560px at 40% 108%, var(--amb-1), transparent 72%);
   }
   html[data-theme="dark"] {
     --glass-border: rgba(255,255,255,0.09);
@@ -972,6 +972,15 @@
   }
   html[data-theme="dark"] .btn-primary { border-color: rgba(255,255,255,0.18); }
   html[data-theme="dark"] .btn-ghost { box-shadow: var(--glass-hi), 0 2px 8px rgba(0,0,0,0.25) !important; }
+
+  /* Admin header in dark mode: beat the older dark-theme header rules so it turns mustard like the student banner */
+  html[data-theme="dark"] .admin-header {
+    background: color-mix(in srgb, var(--primary) 90%, transparent);
+    color: var(--primary-ink);
+    border-bottom-color: color-mix(in srgb, var(--primary-ink) 22%, transparent);
+  }
+  html[data-theme="dark"] .admin-logout-btn { color: var(--primary-ink); border-color: color-mix(in srgb, var(--primary-ink) 55%, transparent); }
+  html[data-theme="dark"] .admin-logout-btn:hover { background: color-mix(in srgb, var(--primary-ink) 18%, transparent); }
 
   /* Small hover feedback (pointer devices only) */
   @media (hover: hover) {
