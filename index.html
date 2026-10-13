@@ -24,7 +24,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
 <style>
   :root {
     --bg: #EFE4D1;
@@ -46,16 +46,16 @@
     --green-soft: #DBE7D3;
     --neutral: #857868;
     --neutral-soft: #E4D9C6;
-    --shadow: 0 1px 2px rgba(70,40,20,0.06);
-    --radius-s: 8px;
-    --radius-m: 14px;
-    --radius-l: 20px;
+    --shadow: none;
+    --radius-s: 2px;
+    --radius-m: 2px;
+    --radius-l: 2px;
     --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
     --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   }
 
   * { box-sizing: border-box; }
-  html, body { height: 100%; }
+  html, body { min-height: 100%; }
   body {
     margin: 0;
     background: var(--bg);
@@ -69,7 +69,7 @@
   input, select, textarea { font-family: inherit; }
   ::selection { background: var(--primary-soft); }
 
-  #app { display: flex; min-height: 100vh; }
+  #app { display: flex; min-height: 100vh; min-height: 100dvh; }
 
   /* ---------- Main ---------- */
   .main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
@@ -96,13 +96,12 @@
   .btn-block { width: 100%; }
 
   /* ---------- Profile banner (top bar: avatar + name, links to the Profile page) ---------- */
-  .profile-banner-container { }
   .profile-banner { background: var(--surface); border-bottom: 1px solid var(--line); user-select: none; }
   .pb-collapsed { display: flex; align-items: center; gap: 12px; padding: 14px 32px; cursor: pointer; }
   .pb-avatar {
-    width: 64px; height: 64px; border-radius: 50%; background: var(--primary); color: var(--primary-ink);
+    width: 48px; height: 48px; border-radius: 50%; background: var(--primary); color: var(--primary-ink);
     display: flex; align-items: center; justify-content: center; font-family: var(--font-display);
-    font-weight: 700; font-size: 22px; overflow: hidden; flex-shrink: 0;
+    font-weight: 700; font-size: 18px; overflow: hidden; flex-shrink: 0;
   }
   .pb-avatar img { width: 100%; height: 100%; object-fit: cover; }
   .pb-name { font-weight: 600; font-size: 16px; }
@@ -138,23 +137,7 @@
   .summary-card.alert .num { color: var(--red); }
 
   .section-heading { font-size: 15px; font-weight: 600; margin: 26px 0 12px; color: var(--ink); }
-  .section-empty { color: var(--ink-muted); font-size: 13.5px; padding: 2px 2px 6px; }
 
-  .deadline-list { display: flex; flex-direction: column; gap: 8px; }
-  .deadline-row {
-    display: flex; align-items: center; gap: 12px;
-    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-m);
-    padding: 12px 14px; box-shadow: var(--shadow); cursor: pointer;
-  }
-  .dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
-  .dot-red { background: var(--red); }
-  .dot-yellow { background: var(--yellow); }
-  .dot-green { background: var(--green); }
-  .dot-neutral { background: var(--neutral); }
-  .deadline-row .dr-main { flex: 1; min-width: 0; }
-  .deadline-row .dr-title { font-size: 14.5px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .deadline-row .dr-sub { font-size: 12.5px; color: var(--ink-muted); margin-top: 2px; }
-  .deadline-row .dr-when { font-size: 12.5px; font-weight: 600; white-space: nowrap; }
 
   .empty-state {
     text-align: center; padding: 50px 20px; color: var(--ink-muted);
@@ -340,44 +323,43 @@
   }
   .notice-banner .spacer { flex: 1 1 auto; }
 
-  /* ---------- In-app file viewer ---------- */
+  /* ---------- File viewer (one full-screen overlay used by every preview) ---------- */
   .pdf-frame { width: 100%; height: 65vh; border: 1px solid var(--line); border-radius: 10px; }
-  .preview-viewer { position: relative; }
   .task-attachment-chip { cursor: pointer; border: 1px solid var(--line); background: var(--surface); }
   .task-attachment-chip:hover { border-color: var(--ink-muted); }
-  .task-attachment-image-wrap { width: 100%; text-align: center; }
-  .task-attachment-image { max-width: 100%; max-height: 70vh; object-fit: contain; border-radius: 10px; display: block; margin: 0 auto; cursor: zoom-in; }
-  .preview-viewer:fullscreen .task-attachment-image, .preview-viewer:-webkit-full-screen .task-attachment-image {
-    max-width: 100%; max-height: 100%; cursor: default;
+  .fs-viewer {
+    position: fixed; inset: 0; z-index: 150; display: flex; flex-direction: column;
+    background: #14110e; color: #F2ECE2;
   }
-  .preview-toolbar { display: flex; gap: 8px; justify-content: center; margin-bottom: 12px; flex-wrap: wrap; }
-  #preview-body img { max-width: 100%; max-height: 70vh; object-fit: contain; border-radius: 10px; display: block; margin: 0 auto; }
-  .preview-viewer:fullscreen, .preview-viewer:-webkit-full-screen {
-    background: var(--surface); display: flex; flex-direction: column;
-    align-items: center; justify-content: center; padding: 16px; width: 100vw; height: 100vh;
+  .fs-bar {
+    display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+    padding: 10px 14px; padding-top: max(10px, env(safe-area-inset-top));
+    background: rgba(0,0,0,0.35);
   }
-  .preview-viewer:fullscreen .preview-toolbar, .preview-viewer:-webkit-full-screen .preview-toolbar { flex-shrink: 0; }
-  .preview-viewer:fullscreen #preview-body, .preview-viewer:-webkit-full-screen #preview-body {
-    flex: 1; width: 100%; min-height: 0; display: flex; align-items: center; justify-content: center;
+  .fs-title { flex: 1; min-width: 0; font-weight: 600; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .fs-btn {
+    background: rgba(255,255,255,0.14); color: #F2ECE2; border: 1px solid rgba(255,255,255,0.28);
+    padding: 7px 12px; font-size: 13px; font-weight: 600; border-radius: 2px; cursor: pointer; font-family: inherit; white-space: nowrap;
   }
-  .preview-viewer:fullscreen #preview-body img, .preview-viewer:-webkit-full-screen #preview-body img { max-height: 100%; }
-  .preview-viewer:fullscreen .pdf-frame, .preview-viewer:-webkit-full-screen .pdf-frame { height: 100%; flex: 1; }
+  .fs-btn:hover { background: rgba(255,255,255,0.24); }
+  .fs-btn:disabled { opacity: .6; cursor: default; }
+  .fs-body { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; }
+  .fs-media { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
+  .fs-frame { width: 100%; height: 100%; border: 0; background: #fff; }
+  .fs-msg { text-align: center; padding: 24px; color: #BDB3A5; font-size: 14px; line-height: 1.5; }
+  .field input[readonly] { opacity: .7; cursor: default; }
+  .item-card[data-kind="material"] .body,
+  .item-card[data-kind="admin-material"] .body { cursor: pointer; }
 
   /* ---------- Timetable viewer ---------- */
   .timetable-toolbar { margin-bottom: 14px; align-items: center; }
-  .timetable-file-meta { margin-top: 3px; font-size: 12px; }
+  .timetable-file-meta { margin-top: 3px; font-size: 12px; color: var(--ink-muted); }
   .timetable-viewer { width: 100%; }
-  .timetable-preview-button {
-    display: block; width: 100%; border: 0; padding: 0; background: transparent; cursor: zoom-in;
-  }
   .timetable-image {
     display: block; width: 100%; max-height: 72vh; object-fit: contain;
     border: 1px solid var(--line); border-radius: var(--radius-m); background: var(--surface-alt);
   }
-  .timetable-preview-button:hover .timetable-image { opacity: .96; }
-  .timetable-pdf-wrap { position: relative; width: 100%; }
   .timetable-pdf-frame { height: 75vh; }
-  .timetable-pdf-open { position: absolute; top: 10px; right: 10px; }
   @media (max-width: 640px) {
     .timetable-toolbar { align-items: flex-start; }
     .timetable-toolbar > .btn, .timetable-toolbar > a { font-size: 12px; }
@@ -390,7 +372,6 @@
     border: none; border-radius: var(--radius-l); padding: 0; max-width: 480px; width: calc(100% - 40px);
     background: var(--surface); color: var(--ink); box-shadow: 0 12px 40px rgba(0,0,0,0.25);
   }
-  dialog.wide { max-width: 720px; }
   dialog::backdrop { background: rgba(20,24,32,0.45); }
   .dialog-inner { padding: 24px; max-height: 84vh; overflow-y: auto; }
   .dialog-inner h2 { font-size: 20px; margin-bottom: 18px; }
@@ -429,13 +410,13 @@
 
   /* ---------- Login screen ---------- */
   #login-screen {
-    display: none; min-height: 100vh; align-items: center; justify-content: center;
-    background: var(--bg); padding: 20px;
+    display: none; min-height: 100vh; min-height: 100dvh; align-items: center; justify-content: center;
+    padding: 20px;
   }
   #login-screen.show { display: flex; }
   /* ---------- Admin dashboard (separate from the student interface) ---------- */
   #admin-screen {
-    display: none; min-height: 100vh; flex-direction: column; background: var(--bg);
+    display: none; min-height: 100vh; min-height: 100dvh; flex-direction: column;
   }
   #admin-screen.show { display: flex; }
   /* The student nav drawer is parked off-screen but its shadow bleeds in; hide it on the admin screen only. */
@@ -538,7 +519,6 @@
   .login-card .brand { justify-content: center; margin-bottom: 18px; }
   .login-sub { text-align: center; color: var(--ink-muted); font-size: 13.5px; margin-bottom: 22px; }
   .login-error { color: var(--red); font-size: 13px; margin-bottom: 12px; display: none; }
-  .login-hint { text-align: center; color: var(--ink-faint); font-size: 12px; margin-top: 14px; }
 
   /* ---------- Toast ---------- */
   #toast-region { position: fixed; bottom: 22px; left: 0; right: 0; display: flex; flex-direction: column; align-items: center; gap: 8px; z-index: 80; pointer-events: none; }
@@ -569,32 +549,6 @@
   }
 
   /* ---------- Clean Academic visual system ---------- */
-  :root {
-    --bg: #EFE4D1;
-    --surface: #FBF6EB;
-    --surface-alt: #E7DAC3;
-    --ink: #2B221B;
-    --ink-muted: #6A5B4D;
-    --ink-faint: #8F8070;
-    --line: #DDCFB6;
-    --line-strong: #C8B79A;
-    --primary: #6D1F31;
-    --primary-ink: #FFFFFF;
-    --primary-soft: #EEDAD0;
-    --red: #C03A2B;
-    --red-soft: #F4D9D0;
-    --yellow: #A8730F;
-    --yellow-soft: #F1E0B8;
-    --green: #3F7A56;
-    --green-soft: #DBE7D3;
-    --neutral: #857868;
-    --neutral-soft: #E4D9C6;
-    --shadow: none;
-    --radius-s: 2px;
-    --radius-m: 2px;
-    --radius-l: 2px;
-  }
-
   body { background: var(--bg); }
   ::selection { background: var(--primary-soft); color: var(--ink); }
 
@@ -614,7 +568,6 @@
   .profile-banner { background: var(--surface); border-bottom-color: var(--line); }
 
   .summary-card,
-  .deadline-row,
   .item-card,
   .folder-card,
   .admin-status,
@@ -638,7 +591,6 @@
   }
 
   .summary-card,
-  .deadline-row,
   .item-card,
   .folder-card,
   .admin-status,
@@ -652,7 +604,6 @@
   }
 
   .summary-card:hover,
-  .deadline-row:hover,
   .item-card:hover,
   .folder-card:hover {
     border-color: var(--line-strong);
@@ -849,21 +800,24 @@
     --amb-2: color-mix(in srgb, #8A7440 18%, transparent);
   }
 
-  /* Soft ambient wash behind the glass so the blur has something to frost */
-  html:root body,
-  #login-screen,
-  #admin-screen {
+  /* Soft ambient wash behind the glass so the blur has something to frost.
+     The grid lines tile with the page; the colour wash lives on a fixed pseudo-element so it
+     always covers the screen instead of ending after the first viewport on long pages. */
+  html:root body {
     background-image:
       linear-gradient(color-mix(in srgb, var(--primary) 7%, transparent) 1px, transparent 1px),
-      linear-gradient(90deg, color-mix(in srgb, var(--primary) 7%, transparent) 1px, transparent 1px),
-      var(--ambient);
-    background-size: 28px 28px, 28px 28px, auto, auto, auto;
-    background-repeat: repeat, repeat, no-repeat, no-repeat, no-repeat;
+      linear-gradient(90deg, color-mix(in srgb, var(--primary) 7%, transparent) 1px, transparent 1px);
+    background-size: 28px 28px, 28px 28px;
+    background-repeat: repeat, repeat;
+  }
+  body::before {
+    content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background-image: var(--ambient);
+    background-repeat: no-repeat;
   }
 
   /* Cards, widgets and tiles */
   .summary-card,
-  .deadline-row,
   .item-card,
   .folder-card,
   .admin-card,
@@ -986,7 +940,6 @@
   @media (hover: hover) {
     .item-card:hover,
     .summary-card:hover,
-    .deadline-row:hover,
     .folder-card:hover,
     .admin-card:hover { transform: translateY(-1px); box-shadow: var(--glass-hi), var(--glass-shadow-hover) !important; }
   }
@@ -1008,14 +961,18 @@
 
   /* Keep long mobile lists light: lighter blur on repeated cards on small screens */
   @media (max-width: 640px) {
-    .item-card, .deadline-row, .folder-card, .summary-card, .admin-card, .admin-summary-item, .profile-field {
+    .item-card, .folder-card, .summary-card, .admin-card, .admin-summary-item, .profile-field {
       -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { transition: none !important; animation: none !important; }
-    .item-card:hover, .summary-card:hover, .deadline-row:hover, .folder-card:hover, .admin-card:hover { transform: none; }
+    .item-card:hover, .summary-card:hover, .folder-card:hover, .admin-card:hover { transform: none; }
+  }
+  @media (max-width: 640px) {
+    .pb-avatar { width: 40px; height: 40px; font-size: 15px; }
+    .pb-collapsed { padding: 8px 14px; }
   }
 </style>
 </head>
@@ -1348,7 +1305,6 @@
         <button type="submit" class="btn btn-primary">Save timetable</button>
       </div>
     </form>
-    <button type="button" class="btn btn-danger btn-block" id="delete-timetable-btn" style="margin-top:10px; display:none;">Delete timetable</button>
   </div>
 </dialog>
 
@@ -1427,6 +1383,26 @@
   </div>
 </dialog>
 
+<!-- Reset password dialog (admin) -->
+<dialog id="reset-password-dialog">
+  <div class="dialog-inner">
+    <button class="modal-close" data-close>&times;</button>
+    <h2>Reset password</h2>
+    <p id="reset-password-for" style="color:var(--ink-muted); font-size:14px; margin-bottom:14px;"></p>
+    <form id="reset-password-form" novalidate>
+      <div class="field" id="f-reset-password">
+        <label for="reset-password-input">New password</label>
+        <input type="password" id="reset-password-input" maxlength="72" placeholder="At least 6 characters" autocomplete="new-password">
+        <div class="error-text">Password must be at least 6 characters.</div>
+      </div>
+      <div class="dialog-actions">
+        <button type="button" class="btn btn-ghost" data-close>Cancel</button>
+        <button type="submit" class="btn btn-primary">Reset password</button>
+      </div>
+    </form>
+  </div>
+</dialog>
+
 <!-- Profile dialog -->
 <dialog id="profile-dialog">
   <div class="dialog-inner">
@@ -1440,14 +1416,15 @@
           <input type="file" id="p-avatar-input" accept="image/*" style="flex:1;">
         </div>
       </div>
-      <div class="field"><label for="p-name">Name</label><input type="text" id="p-name" maxlength="80"></div>
+      <p style="margin:-4px 0 14px;color:var(--ink-muted);font-size:13px;">Name, class and roll number are set by your class admin. You can change your photo and school.</p>
+      <div class="field"><label for="p-name">Name</label><input type="text" id="p-name" maxlength="80" readonly></div>
       <div class="field-row">
-        <div class="field"><label for="p-class">Class</label><input type="text" id="p-class" maxlength="40"></div>
-        <div class="field"><label for="p-section">Section</label><input type="text" id="p-section" maxlength="20"></div>
+        <div class="field"><label for="p-class">Class</label><input type="text" id="p-class" maxlength="40" readonly></div>
+        <div class="field"><label for="p-section">Section</label><input type="text" id="p-section" maxlength="20" readonly></div>
       </div>
-      <div class="field"><label for="p-year">Academic year</label><input type="text" id="p-year" placeholder="e.g. 2026–2027" maxlength="20"></div>
+      <div class="field"><label for="p-year">Academic year</label><input type="text" id="p-year" placeholder="e.g. 2026–2027" maxlength="20" readonly></div>
       <div class="field"><label for="p-school">College / school name</label><input type="text" id="p-school" maxlength="120"></div>
-      <div class="field"><label for="p-roll">Roll number</label><input type="text" id="p-roll" maxlength="40"></div>
+      <div class="field"><label for="p-roll">Roll number</label><input type="text" id="p-roll" maxlength="40" readonly></div>
       <div class="dialog-actions">
         <button type="button" class="btn btn-ghost" data-close>Cancel</button>
         <button type="submit" class="btn btn-primary">Save profile</button>
@@ -1468,21 +1445,6 @@
   </div>
 </dialog>
 
-<!-- File preview dialog -->
-<dialog id="preview-dialog">
-  <div class="dialog-inner" style="text-align:center;">
-    <button class="modal-close" data-close>&times;</button>
-    <h2 id="preview-title" style="margin-bottom:14px;"></h2>
-    <div id="preview-viewer" class="preview-viewer">
-      <div class="preview-toolbar" id="preview-toolbar" style="display:none;">
-        <button type="button" class="btn btn-ghost btn-sm" id="preview-fullscreen-btn" style="display:none;">⛶ Full screen</button>
-        <a href="#" class="btn btn-ghost btn-sm" id="preview-download-btn" style="display:none;text-decoration:none;">⬇ Download</a>
-      </div>
-      <div id="preview-body"></div>
-    </div>
-  </div>
-</dialog>
-
 <datalist id="subject-list">
   <option value="Mathematics"><option value="Science"><option value="English">
   <option value="History"><option value="Geography"><option value="Computer Science">
@@ -1496,7 +1458,6 @@
 
 /* ============================== ICONS ============================== */
 const ICONS = {
-  home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9a1 1 0 0 0 1 1H10v-6h4v6h3.5a1 1 0 0 0 1-1v-9"/></svg>',
   tasks: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 12.5 10.5 15 16 9"/></svg>',
   reminders: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2.5h-15z"/><path d="M10 19a2 2 0 0 0 4 0"/></svg>',
   materials: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/></svg>',
@@ -1509,7 +1470,9 @@ const DB_NAME = 'coursework_tracker_db';
 const DB_VERSION = 4;
 let dbPromise = null;
 let dbUnavailable = false;
-const memStore = { tasks: new Map(), worksheets: new Map(), profile: new Map(), reminders: new Map(), materials: new Map(), folders: new Map(), meta: new Map(), timetable: new Map(), events: new Map(), personal_tasks: new Map(), personal_reminders: new Map() };
+// Only these stores are still read or written. The older stores (tasks, worksheets, reminders,
+// materials, folders, timetable, events) stay in the database schema untouched so no version bump is needed.
+const memStore = { profile: new Map(), meta: new Map(), personal_tasks: new Map(), personal_reminders: new Map() };
 
 function openDB(){
   if (dbPromise) return dbPromise;
@@ -1568,17 +1531,9 @@ async function dbPut(store, obj){
   } catch (e) { memStore[store].set(obj.id, obj); return obj; }
 }
 
-async function dbDelete(store, id){
-  if (dbUnavailable) { memStore[store].delete(id); return; }
-  try {
-    const db = await openDB();
-    await new Promise((resolve, reject) => {
-      const tx = db.transaction(store, 'readwrite');
-      tx.objectStore(store).delete(id);
-      tx.oncomplete = resolve;
-      tx.onerror = () => reject(tx.error);
-    });
-  } catch (e) { memStore[store].delete(id); }
+async function dbGet(store, id){
+  const all = await dbAll(store);
+  return all.find(x => x.id === id) || null;
 }
 
 /* ============================== STATE ============================== */
@@ -1586,7 +1541,7 @@ const state = {
   route: 'home',
   authed: false,
   role: null,
-  profile: { id: 'profile', name: '', className: '', section: '', year: '', school: '', roll: '', avatarData: '', avatarType: '' },
+  profile: blankProfile(),
   tasks: [],
   reminders: [],
   myTasks: [],        // personal, per-student tasks — Supabase-backed (personal_tasks), synced to this account across devices
@@ -1625,6 +1580,10 @@ const state = {
   adminStudentsStatus: 'idle',   // idle | loading | ready | error
   adminStudentSearch: ''
 };
+
+function blankProfile(){
+  return { name: '', className: '', section: '', year: '', school: '', roll: '', avatarData: '', avatarType: '' };
+}
 
 function uid(){
   if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
@@ -1808,33 +1767,6 @@ function greetingWord(){
   if (h < 12) return 'Good morning';
   if (h < 17) return 'Good afternoon';
   return 'Good evening';
-}
-function urgentTaskRow(t){
-  return `<div class="deadline-row" data-route-to="tasks">
-    <span class="dot dot-red"></span>
-    <div class="dr-main">
-      <div class="dr-title">${esc(t.name)}</div>
-      <div class="dr-sub">${t.subject ? esc(t.subject) + ' · ' : ''}Due ${formatDate(t.dueDate)}${t.dueTime ? ' · ' + formatTime(t.dueTime) : ''}</div>
-    </div>
-  </div>`;
-}
-function eventRow(ev){
-  return `<div class="deadline-row" data-route-to="events">
-    <span class="dot dot-neutral"></span>
-    <div class="dr-main">
-      <div class="dr-title">${esc(ev.name)}</div>
-      <div class="dr-sub">${formatDate(ev.date)}${ev.time ? ' — ' + formatTime(ev.time) : ''}</div>
-    </div>
-  </div>`;
-}
-function tomorrowReminderRow(r){
-  return `<div class="deadline-row" data-route-to="reminders">
-    <span class="dot dot-yellow"></span>
-    <div class="dr-main">
-      <div class="dr-title">${esc(r.title)}</div>
-      <div class="dr-sub">${formatDate(r.date)}</div>
-    </div>
-  </div>`;
 }
 // Dashboard quick-access cards. Visually matches the admin dashboard's "Manage" card
 // grid (same .admin-card-grid/.admin-card styling, same icons/desc text where the section
@@ -2127,6 +2059,7 @@ function renderReminders(){
 const MATERIALS_BUCKET = 'materials';
 const TASKS_BUCKET = 'tasks';
 const TIMETABLE_BUCKET = 'timetable';
+const SIGNED_URL_TTL = 3600;   // seconds; the one lifetime used for every signed link
 
 function toFolderModel(row){
   return { id: row.id, name: row.name || '', parentFolderId: row.parent_folder_id || null, createdAt: row.created_at ? Date.parse(row.created_at) : 0 };
@@ -2227,7 +2160,7 @@ function materialCard(m){
   <article class="item-card" data-id="${esc(m.id)}" data-kind="material">
     <div class="body">
       <div class="ws-head">
-        <div class="file-thumb" data-action="preview-material" title="View material">${fileIcon(m.mimeType)}</div>
+        <div class="file-thumb">${fileIcon(m.mimeType)}</div>
         <div style="flex:1;min-width:0;">
           <div class="top-row">
             <h3>${esc(m.name)}</h3>
@@ -2324,31 +2257,13 @@ function normalizeTimetableStoragePath(path){
   while (p.startsWith('/')) p = p.slice(1);
   return p;
 }
-// Fetches a pair of short-lived signed URLs for a timetable Storage object: one for inline
-// viewing, one that forces a download with the original filename. Used on load (student and
-// admin) and right after an admin upload, so the page never needs a public URL. Bucket is
-// always TIMETABLE_BUCKET ("timetable"); path is always the exact (normalized) storage_path
-// value from the database row — never a value we constructed ourselves.
-async function fetchTimetableUrls(storagePath, filename){
+// Short-lived signed URL for inline viewing of the private timetable file. Downloads and the
+// full-screen viewer fetch their own fresh links on demand (see openFileViewer/downloadStorageFile).
+async function fetchTimetableViewUrl(storagePath){
   const path = normalizeTimetableStoragePath(storagePath);
-  // Debug logging for the private Storage lookup — kept deliberately verbose (rather than
-  // swallowed into a single generic message) so a signed-URL failure can be diagnosed from the
-  // real Supabase Storage error instead of guessed at.
-  console.log('TIMETABLE STORAGE PATH (from DB row):', storagePath);
-  if (path !== storagePath) console.log('TIMETABLE STORAGE PATH (normalized for createSignedUrl):', path);
-  const { data: signedData, error: signedError } = await supabase.storage
-    .from(TIMETABLE_BUCKET)
-    .createSignedUrl(path, 3600);
-  console.log('TIMETABLE SIGNED URL DATA:', signedData);
-  console.error('TIMETABLE SIGNED URL ERROR:', signedError);
-  if (signedError) throw signedError;
-  const { data: downloadData, error: downloadError } = await supabase.storage
-    .from(TIMETABLE_BUCKET)
-    .createSignedUrl(path, 3600, { download: filename || true });
-  console.log('TIMETABLE DOWNLOAD SIGNED URL DATA:', downloadData);
-  console.error('TIMETABLE DOWNLOAD SIGNED URL ERROR:', downloadError);
-  if (downloadError) throw downloadError;
-  return { viewUrl: signedData.signedUrl, downloadUrl: downloadData.signedUrl };
+  const { data, error } = await supabase.storage.from(TIMETABLE_BUCKET).createSignedUrl(path, SIGNED_URL_TTL);
+  if (error) throw error;
+  return data.signedUrl;
 }
 function renderTimetable(){
   if (state.timetableStatus === 'loading') {
@@ -2372,20 +2287,15 @@ function renderTimetable(){
   const isPdf = t.mimeType === 'application/pdf';
   let viewer;
   if (isImg) {
-    viewer = `<button type="button" class="timetable-preview-button" data-action="preview-timetable" aria-label="Open timetable full screen">
-      <img src="${t.viewUrl}" alt="${esc(t.fileName)}" class="timetable-image">
-    </button>`;
+    viewer = `<img src="${t.viewUrl}" alt="${esc(t.fileName)}" class="timetable-image">`;
   } else if (isPdf) {
-    viewer = `<div class="timetable-pdf-wrap">
-      <iframe src="${t.viewUrl}" class="pdf-frame timetable-pdf-frame" title="Timetable PDF"></iframe>
-      <button type="button" class="btn btn-ghost btn-sm timetable-pdf-open" data-action="preview-timetable">⛶ Full screen</button>
-    </div>`;
+    viewer = `<iframe src="${t.viewUrl}" class="pdf-frame timetable-pdf-frame" title="Timetable PDF"></iframe>`;
   } else {
     viewer = `<div class="empty-state">
       <div class="es-title">${fileIcon(t.mimeType)} ${esc(t.fileName)}</div>
       <p>Preview isn't available for this file type inside the app.</p>
       <div style="margin-top:14px;">
-        <a href="${t.downloadUrl}" download="${esc(t.fileName)}" class="btn btn-primary" style="text-decoration:none;">⬇ Download file</a>
+        <button type="button" class="btn btn-primary" data-action="download-timetable">⬇ Download file</button>
       </div>
     </div>`;
   }
@@ -2398,7 +2308,7 @@ function renderTimetable(){
       </div>
       <div class="spacer"></div>
       ${(isImg || isPdf) ? `<button type="button" class="btn btn-ghost" data-action="preview-timetable">⛶ Full screen</button>` : ''}
-      <a href="${t.downloadUrl}" download="${esc(t.fileName)}" class="btn btn-ghost" style="text-decoration:none;">⬇ Download</a>
+      <button type="button" class="btn btn-ghost" data-action="download-timetable">⬇ Download</button>
     </div>
     <div class="timetable-viewer">${viewer}</div>
   `;
@@ -2423,9 +2333,7 @@ async function loadStudentTimetable(silent){
     if (row) {
       model = toTimetableModel(row);
       try {
-        const urls = await fetchTimetableUrls(model.storagePath, model.fileName);
-        model.viewUrl = urls.viewUrl;
-        model.downloadUrl = urls.downloadUrl;
+        model.viewUrl = await fetchTimetableViewUrl(model.storagePath);
       } catch (urlErr) {
         // The database row loaded fine — only the Storage signed URL failed. Surface that
         // distinctly (see renderTimetable()'s t.urlError branch) instead of reporting a generic
@@ -2600,8 +2508,7 @@ const supabase = window.supabase
     })
   : null;
 
-// Web Push public VAPID key. Replace this placeholder with the public key generated
-// for the Supabase push sender. Never put the VAPID private key in this file.
+// Web Push public VAPID key (public by design). The private key lives only in Supabase secrets, never in this file.
 const VAPID_PUBLIC_KEY = 'BMYFU_ndOfxPK_hSy3lTZEdDwbJZn2Frj2y7K6JVHaZDHK6S0LfiF8z9Y6jGf9gEBcHLRfGy9Wr-adaPaPFpEYQ';
 let pushRegistration = null;
 let notificationPollTimer = null;
@@ -2913,7 +2820,7 @@ function confirmDeleteAdminTask(t){
    reminder's own class may create, edit, or delete them (RLS enforces the
    same rule server-side). Maps a public.reminders row onto the shape the
    existing Reminders/Home rendering already understands (id, title, notes,
-   date), so reminderCard()/tomorrowReminderRow()/renderReminders() need no
+   date), so reminderCard()/renderReminders() need no
    changes. */
 function toReminderModel(row){
   return {
@@ -3049,7 +2956,7 @@ function confirmDeleteAdminReminder(r){
 
 /* ---------- Admin: class timetable (Supabase public.timetables + Storage) ----------
    One record per class (unique constraint on class_id — see toTimetableModel()/
-   fetchTimetableUrls() above, shared with the student read-only view). Only admins upload,
+   fetchTimetableViewUrl() above, shared with the student read-only view). Only admins upload,
    replace, or delete the timetable; the form/delete handlers live further down next to the
    other dialogs (see "TIMETABLE FORM"). Files live in the private "timetable" Storage bucket;
    there are no public URLs, only short-lived signed URLs. */
@@ -3082,14 +2989,9 @@ function renderAdminTimetable(){
       const isPdf = t.mimeType === 'application/pdf';
       let viewer;
       if (isImg) {
-        viewer = `<button type="button" class="timetable-preview-button" data-admin-timetable-action="preview" aria-label="Open timetable full screen">
-          <img src="${t.viewUrl}" alt="${esc(t.fileName)}" class="timetable-image">
-        </button>`;
+        viewer = `<img src="${t.viewUrl}" alt="${esc(t.fileName)}" class="timetable-image">`;
       } else if (isPdf) {
-        viewer = `<div class="timetable-pdf-wrap">
-          <iframe src="${t.viewUrl}" class="pdf-frame timetable-pdf-frame" title="Timetable PDF"></iframe>
-          <button type="button" class="btn btn-ghost btn-sm timetable-pdf-open" data-admin-timetable-action="preview">⛶ Full screen</button>
-        </div>`;
+        viewer = `<iframe src="${t.viewUrl}" class="pdf-frame timetable-pdf-frame" title="Timetable PDF"></iframe>`;
       } else {
         viewer = `<div class="empty-state">
           <div class="es-title">${fileIcon(t.mimeType)} ${esc(t.fileName)}</div>
@@ -3104,7 +3006,7 @@ function renderAdminTimetable(){
           </div>
           <div class="spacer"></div>
           ${(isImg || isPdf) ? `<button type="button" class="btn btn-ghost" data-admin-timetable-action="preview">⛶ Full screen</button>` : ''}
-          <a href="${t.downloadUrl}" download="${esc(t.fileName)}" class="btn btn-ghost" style="text-decoration:none;">⬇ Download</a>
+          <button type="button" class="btn btn-ghost" data-admin-timetable-action="download">⬇ Download</button>
           <button type="button" class="btn btn-ghost" data-admin-timetable-action="replace">Replace Timetable</button>
           <button type="button" class="btn btn-danger" data-admin-timetable-action="delete">🗑 Delete</button>
         </div>
@@ -3141,9 +3043,7 @@ async function loadAdminTimetable(){
     if (row) {
       model = toTimetableModel(row);
       try {
-        const urls = await fetchTimetableUrls(model.storagePath, model.fileName);
-        model.viewUrl = urls.viewUrl;
-        model.downloadUrl = urls.downloadUrl;
+        model.viewUrl = await fetchTimetableViewUrl(model.storagePath);
       } catch (urlErr) {
         // The database row loaded fine — only the Storage signed URL failed. Surface that
         // distinctly (see renderAdminTimetable()'s t.urlError branch) instead of reporting a
@@ -3190,9 +3090,6 @@ function confirmDeleteAdminTimetable(){
    Only admins create, edit, or delete events (RLS enforces the same rule server-side); students
    get a read-only view (see loadStudentEvents() above). The form/delete handlers live further
    down next to the other dialogs (see "EVENT FORM"). */
-function adminEventCard(ev){
-  return eventCard(ev, true);
-}
 
 function renderAdminEvents(){
   if (!state.authed || state.role !== 'admin') return;
@@ -3293,9 +3190,9 @@ function adminMaterialCard(m){
   const size = formatFileSize(m.fileSize);
   return `
   <article class="item-card" data-id="${esc(m.id)}" data-kind="admin-material">
-    <div class="body">
+    <div class="body" data-admin-material-action="preview" title="Open file">
       <div class="ws-head">
-        <div class="file-thumb" data-admin-material-action="preview" title="Preview material">${fileIcon(m.mimeType)}</div>
+        <div class="file-thumb">${fileIcon(m.mimeType)}</div>
         <div style="flex:1;min-width:0;">
           <div class="top-row">
             <h3>${esc(m.name)}</h3>
@@ -3308,7 +3205,6 @@ function adminMaterialCard(m){
       </div>
     </div>
     <div class="actions">
-      <button type="button" class="icon-btn edit" data-admin-material-action="preview">↗ View</button>
       <button type="button" class="icon-btn edit" data-admin-material-action="edit">✎ Edit</button>
       <button type="button" class="icon-btn edit" data-admin-material-action="move">📁 Move</button>
       <button type="button" class="icon-btn remove" data-admin-material-action="delete">🗑 Delete</button>
@@ -3619,22 +3515,37 @@ document.getElementById('student-form').addEventListener('submit', async (e) => 
   }
 });
 
-async function resetStudentPassword(row){
-  const newPw = window.prompt(`Set a new password for ${row.name} (${row.student_id}). Minimum 6 characters:`);
-  if (newPw === null) return;   // cancelled
-  if (newPw.length < 6) { toast('Password must be at least 6 characters.'); return; }
+let resettingStudent = null;
+function resetStudentPassword(row){
+  resettingStudent = row;
+  document.getElementById('reset-password-form').reset();
+  document.getElementById('reset-password-for').textContent = `${row.name} (${row.student_id})`;
+  clearFieldError('f-reset-password');
+  openDialog('reset-password-dialog');
+}
+document.getElementById('reset-password-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (!resettingStudent || state.role !== 'admin' || !state.authed) return;
+  const pw = document.getElementById('reset-password-input').value;
+  clearFieldError('f-reset-password');
+  if (pw.length < 6) { setFieldError('f-reset-password'); return; }
+  const submitBtn = e.target.querySelector('button[type="submit"]');
+  submitBtn.disabled = true;
   try {
     const { data, error } = await supabase.functions.invoke('admin-reset-student-password', {
-      body: { id: row.id, password: newPw }
+      body: { id: resettingStudent.id, password: pw }
     });
     if (error) throw userError('Something went wrong. Please try again.');
     if (!data || !data.ok) throw userError((data && data.error) || 'Could not reset the password.');
+    closeDialog('reset-password-dialog');
     toast('Password reset');
   } catch (err) {
     console.error('Resetting password failed:', err);
     toast(err && err.userMessage ? err.userMessage : 'Could not reset the password. Please try again.');
+  } finally {
+    submitBtn.disabled = false;
   }
-}
+});
 
 async function makeStudentAdmin(row){
   if (!row || !state.authed || state.role !== 'admin') return;
@@ -3748,6 +3659,13 @@ function showLoginScreen(){
   state.myTasksStatus = 'idle';
   state.myReminders = [];
   state.myRemindersStatus = 'idle';
+  state.reminders = []; state.remindersStatus = 'idle';
+  state.materials = []; state.folders = []; state.materialsStatus = 'idle'; state.materialsView = { folderId: null };
+  state.timetable = null; state.timetableStatus = 'idle';
+  state.events = []; state.eventsStatus = 'idle';
+  state.notifications = [];
+  state.profile = blankProfile();
+  if (notificationPollTimer) { clearInterval(notificationPollTimer); notificationPollTimer = null; }
 }
 
 // Reads the caller's profiles row, joined to classes when that relationship exists.
@@ -3760,18 +3678,21 @@ async function fetchProfileWithClass(userId){
   return plain.data;
 }
 
-// Maps the Supabase profiles row onto local display state. "school" has no
-// column in this schema, so it's left as whatever was saved locally.
-function applyRemoteProfile(row){
+// Name, class, section, year and roll number come from Supabase (managed by the class admin).
+// School and a locally chosen photo are stored on this device only, keyed per user, so they
+// can never show up for another student who signs in on the same device.
+function applyRemoteProfile(row, local){
   const cls = row.classes || null;
+  local = local || {};
   state.profile = {
-    ...state.profile,
     name: row.name || '',
-    className: cls && cls.name ? cls.name : (state.profile.className || ''),
+    className: cls && cls.name ? cls.name : '',
     section: row.section || (cls && cls.section ? cls.section : ''),
-    year: cls && cls.academic_year ? cls.academic_year : (state.profile.year || ''),
+    year: cls && cls.academic_year ? cls.academic_year : '',
     roll: row.roll_number || '',
-    avatarData: row.profile_picture_url || state.profile.avatarData || ''
+    school: local.school || '',
+    avatarData: local.avatarData || row.profile_picture_url || '',
+    avatarType: local.avatarType || ''
   };
 }
 
@@ -3790,8 +3711,9 @@ async function handleAuthenticatedSession(session){
     await supabase.auth.signOut();
     return;
   }
-  applyRemoteProfile(profileRow);
-  await dbPut('profile', state.profile);
+  const localProfileRecords = await dbAll('profile');
+  const localProfile = localProfileRecords.find(r => r.id === 'profile:' + profileRow.id) || null;
+  applyRemoteProfile(profileRow, localProfile);
   state.role = profileRow.role;
   state.authed = true;
   state.userId = profileRow.id;
@@ -3806,6 +3728,7 @@ async function handleAuthenticatedSession(session){
       loadStudentTimetable(), loadStudentEvents(), loadPersonalTasks(), loadPersonalReminders()
     ]);
     showApp();
+    checkPersonalNotifications();
   }
 }
 
@@ -3823,94 +3746,6 @@ async function dismissTaskForUser(userId, taskId){
   await dbPut('meta', { id: 'dismissed_tasks:' + userId, ids: Array.from(ids) });
 }
 
-function taskFileNameFromPath(path, fallback){
-  if (path) {
-    const base = path.split('/').pop();
-    const match = base && base.match(/^[0-9a-fA-F-]{36}-(.+)$/);
-    if (match) return match[1];
-    if (base) return base;
-  }
-  return fallback || 'attachment';
-}
-
-async function openTaskAttachment(t){
-  document.getElementById('preview-title').textContent = t.fileName || t.name;
-  const body = document.getElementById('preview-body');
-  const dialogEl = document.getElementById('preview-dialog');
-  const toolbar = document.getElementById('preview-toolbar');
-  const fsBtn = document.getElementById('preview-fullscreen-btn');
-  const dlBtn = document.getElementById('preview-download-btn');
-  dialogEl.classList.remove('wide');
-  toolbar.style.display = 'none';
-  fsBtn.style.display = 'none';
-  dlBtn.style.display = 'none';
-  body.innerHTML = `<p style="color:var(--ink-muted);">Loading attachment…</p>`;
-  openDialog('preview-dialog');
-
-  if (!t.storagePath) {
-    body.innerHTML = `<p style="color:var(--ink-muted);">No file attached.</p>`;
-    return;
-  }
-
-  try {
-    const filename = taskFileNameFromPath(t.storagePath, t.fileName);
-    const [viewRes, downloadRes] = await Promise.all([
-      supabase.storage.from(TASKS_BUCKET).createSignedUrl(t.storagePath, 600),
-      supabase.storage.from(TASKS_BUCKET).createSignedUrl(t.storagePath, 600, { download: filename })
-    ]);
-    if (viewRes.error) throw viewRes.error;
-    if (downloadRes.error) throw downloadRes.error;
-
-    const url = viewRes.data.signedUrl;
-    dlBtn.href = downloadRes.data.signedUrl;
-    dlBtn.setAttribute('download', filename);
-    dlBtn.style.display = '';
-
-    const isImage = !!(t.fileType && t.fileType.startsWith('image/'));
-    const isPdf = t.fileType === 'application/pdf';
-
-    if (isImage) {
-      body.innerHTML = `
-        <div class="task-attachment-image-wrap">
-          <img src="${esc(url)}" alt="${esc(filename)}" class="task-attachment-image">
-        </div>`;
-      fsBtn.style.display = '';
-      toolbar.style.display = 'flex';
-    } else if (isPdf) {
-      dialogEl.classList.add('wide');
-      body.innerHTML = `
-        <iframe
-          src="${esc(url)}#toolbar=1&navpanes=0&scrollbar=1"
-          class="pdf-frame"
-          title="${esc(filename)}"
-          loading="eager">
-        </iframe>`;
-      fsBtn.style.display = '';
-      toolbar.style.display = 'flex';
-    } else {
-      toolbar.style.display = 'flex';
-      body.innerHTML = `
-        <div style="text-align:center;padding:24px 8px;">
-          <div style="font-size:42px;margin-bottom:12px;">${fileIcon(t.fileType)}</div>
-          <p style="margin:0 0 14px;font-weight:600;">${esc(filename)}</p>
-          <a href="${esc(downloadRes.data.signedUrl)}"
-             download="${esc(filename)}"
-             class="btn btn-primary"
-             style="text-decoration:none;">⬇ Download file</a>
-        </div>`;
-    }
-    updatePreviewFullscreenLabel();
-  } catch (err) {
-    console.error('Opening task attachment failed:', err);
-    toolbar.style.display = 'none';
-    body.innerHTML = `<div style="text-align:center;padding:24px 8px;">
-      <p style="color:var(--ink-muted);">We couldn't open this attachment right now.</p>
-      <button type="button" class="btn btn-primary" id="retry-task-attachment">Try again</button>
-    </div>`;
-    const retry = document.getElementById('retry-task-attachment');
-    if (retry) retry.addEventListener('click', () => openTaskAttachment(t));
-  }
-}
 let tasksLoading = false;
 // silent = background refresh: keeps what is on screen and never shows a loading/error state.
 async function loadStudentTasks(silent){
@@ -4102,11 +3937,9 @@ async function handleLogout(){
 }
 
 /* ============================== TASK FORM ============================== */
-let pendingTaskFile = null;
 document.getElementById('task-file').addEventListener('change', (e) => {
   const file = e.target.files[0];
   clearFieldError('f-task-file');
-  pendingTaskFile = null;
   if (!file) return;
   const allowed = new Set([
     'application/pdf',
@@ -4205,7 +4038,6 @@ document.getElementById('task-form').addEventListener('submit', async (e) => {
     if (idx >= 0) state.adminTasks[idx] = model; else state.adminTasks.push(model);
     state.adminTasks.sort(compareDue);
     document.getElementById('task-file').value = '';
-    pendingTaskFile = null;
     closeDialog('task-dialog');
     toast(existingId ? 'Task updated' : 'Task created');
     renderAdminTasks();
@@ -4232,7 +4064,6 @@ function openAdminTaskDialog(t){
   document.getElementById('task-due-time').value = t ? t.dueTime : '';
   document.getElementById('task-notes').value = t ? t.notes : '';
   document.getElementById('task-file').value = '';
-  pendingTaskFile = null;
   document.getElementById('task-dialog-title').textContent = t ? 'Edit task' : 'Add task';
   document.getElementById('f-task-file').style.display = '';
   const fileField = document.getElementById('f-task-file');
@@ -4797,9 +4628,7 @@ document.getElementById('timetable-form').addEventListener('submit', async (e) =
     }
     const model = toTimetableModel(row);
     try {
-      const urls = await fetchTimetableUrls(model.storagePath, model.fileName);
-      model.viewUrl = urls.viewUrl;
-      model.downloadUrl = urls.downloadUrl;
+      model.viewUrl = await fetchTimetableViewUrl(model.storagePath);
     } catch (urlErr) {
       // The upload and the database write both succeeded — only generating a signed link for
       // the immediate view failed. Don't report the save itself as failed; the panel's retry
@@ -4818,15 +4647,10 @@ document.getElementById('timetable-form').addEventListener('submit', async (e) =
     submitBtn.disabled = false;
   }
 });
-document.getElementById('delete-timetable-btn').addEventListener('click', () => {
-  if (state.role !== 'admin' || !state.authed) return;
-  confirmDeleteAdminTimetable();
-});
 function openAddAdminTimetableDialog(){
   document.getElementById('timetable-form').reset();
   pendingTimetableFile = null;
   document.getElementById('timetable-dialog-title').textContent = 'Add timetable';
-  document.getElementById('delete-timetable-btn').style.display = 'none';
   clearFieldError('f-timetable-file');
   openDialog('timetable-dialog');
 }
@@ -4834,7 +4658,6 @@ function openReplaceAdminTimetableDialog(){
   document.getElementById('timetable-form').reset();
   pendingTimetableFile = null;
   document.getElementById('timetable-dialog-title').textContent = 'Replace timetable';
-  document.getElementById('delete-timetable-btn').style.display = state.adminTimetable ? 'block' : 'none';
   clearFieldError('f-timetable-file');
   openDialog('timetable-dialog');
 }
@@ -4934,19 +4757,24 @@ document.getElementById('p-avatar-input').addEventListener('change', async (e) =
 });
 document.getElementById('profile-form').addEventListener('submit', async (e) => {
   e.preventDefault();
-  const p = {
-    id: 'profile',
-    name: document.getElementById('p-name').value.trim(),
-    className: document.getElementById('p-class').value.trim(),
-    section: document.getElementById('p-section').value.trim(),
-    year: document.getElementById('p-year').value.trim(),
+  if (!state.userId) return;
+  // Only the photo and school are editable here, and they are saved on this device only
+  // (keyed per user). Everything else is managed by the class admin.
+  const records = await dbAll('profile');
+  const existing = records.find(r => r.id === 'profile:' + state.userId) || {};
+  const local = {
+    id: 'profile:' + state.userId,
     school: document.getElementById('p-school').value.trim(),
-    roll: document.getElementById('p-roll').value.trim(),
-    avatarData: pendingAvatarFile ? pendingAvatarFile.fileData : (state.profile.avatarData || ''),
-    avatarType: pendingAvatarFile ? pendingAvatarFile.fileType : (state.profile.avatarType || '')
+    avatarData: pendingAvatarFile ? pendingAvatarFile.fileData : (existing.avatarData || ''),
+    avatarType: pendingAvatarFile ? pendingAvatarFile.fileType : (existing.avatarType || '')
   };
-  await dbPut('profile', p);
-  state.profile = p;
+  await dbPut('profile', local);
+  state.profile = {
+    ...state.profile,
+    school: local.school,
+    avatarData: local.avatarData || state.profile.avatarData,
+    avatarType: local.avatarType
+  };
   closeDialog('profile-dialog');
   toast('Profile saved');
   render();
@@ -4981,176 +4809,167 @@ function askConfirm(title, body, action, confirmLabel){
   openDialog('confirm-dialog');
 }
 
-/* ============================== FILE PREVIEW ============================== */
-function openTimetablePreview(t){
-  if (!t || !t.viewUrl) return;
-  const title = document.getElementById('preview-title');
-  const body = document.getElementById('preview-body');
-  const dialogEl = document.getElementById('preview-dialog');
-  const toolbar = document.getElementById('preview-toolbar');
-  const fsBtn = document.getElementById('preview-fullscreen-btn');
-  const dlBtn = document.getElementById('preview-download-btn');
+/* ============================== FILE VIEWER ==============================
+   One full-screen viewer for every file preview (materials, task attachments, timetable).
+   A single tap/click opens the file directly in full screen: there is no intermediate dialog.
+   Files live in private Storage buckets, so every open fetches a fresh short-lived signed URL. */
 
-  title.textContent = t.fileName || 'Timetable';
-  dialogEl.classList.remove('wide');
-  toolbar.style.display = 'none';
-  fsBtn.style.display = 'none';
-  dlBtn.style.display = 'none';
+// On touch devices a PDF opened in its own tab uses the browser's native viewer, which scrolls
+// through every page; a PDF inside an iframe often shows only the first page there.
+// Set to false to always use the in-app viewer instead.
+const PDF_OPENS_IN_TAB_ON_TOUCH = true;
 
-  const isImage = t.mimeType && t.mimeType.startsWith('image/');
-  const isPdf = t.mimeType === 'application/pdf';
+let fileViewerEl = null;
+let fileViewerOpener = null;
+let fileViewerKeyHandler = null;
+let fileViewerFsHandler = null;
 
-  if (isImage) {
-    dialogEl.classList.add('wide');
-    body.innerHTML = `<img src="${t.viewUrl}" alt="${esc(t.fileName)}">`;
-  } else if (isPdf) {
-    dialogEl.classList.add('wide');
-    body.innerHTML = `<iframe src="${t.viewUrl}" class="pdf-frame" title="Timetable PDF"></iframe>`;
-  } else {
-    body.innerHTML = `<div class="empty-state"><div class="es-title">${fileIcon(t.mimeType)} ${esc(t.fileName)}</div>
-      <p>Preview isn't available for this file type.</p></div>`;
-  }
+function fsElement(){ return document.fullscreenElement || document.webkitFullscreenElement || null; }
 
-  dlBtn.href = t.downloadUrl || t.viewUrl;
-  dlBtn.setAttribute('download', t.fileName || 'timetable');
-  dlBtn.style.display = '';
-  toolbar.style.display = 'flex';
-
-  if ((isImage || isPdf) && fullscreenSupported()) {
-    fsBtn.style.display = '';
-    updatePreviewFullscreenLabel();
-  }
-  openDialog('preview-dialog');
+// Matches the "<class_id>/<uuid>-<original filename>" storage path convention used by uploads.
+function fileNameFromStoragePath(path, fallback){
+  const base = path ? String(path).split('/').pop() : '';
+  const match = base.match(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}-(.+)$/);
+  return (match && match[1]) || base || fallback || 'file';
 }
 
-function openPreview(item){
-  document.getElementById('preview-title').textContent = item.name;
-  const body = document.getElementById('preview-body');
-  const dialogEl = document.getElementById('preview-dialog');
-  dialogEl.classList.remove('wide');
-  document.getElementById('preview-toolbar').style.display = 'none';   // this dialog is shared with Materials preview
-  if (!item.fileData) {
-    body.innerHTML = `<p style="color:var(--ink-muted);">No file attached.</p>`;
-  } else if (item.fileType && item.fileType.startsWith('image/')) {
-    body.innerHTML = `<img src="${item.fileData}" style="max-width:100%;border-radius:10px;">`;
-  } else if (item.fileType === 'application/pdf') {
-    dialogEl.classList.add('wide');
-    body.innerHTML = `
-      <iframe src="${item.fileData}" class="pdf-frame"></iframe>
-      <div style="margin-top:12px;">
-        <a href="${item.fileData}" download="${esc(item.fileName)}" class="btn btn-ghost btn-sm" style="text-decoration:none;">Download</a>
-      </div>`;
-  } else {
-    body.innerHTML = `<p style="color:var(--ink-muted); margin-bottom:14px;">${esc(item.fileName)}</p>
-      <a href="${item.fileData}" download="${esc(item.fileName)}" class="btn btn-primary" style="text-decoration:none;">Open / download file</a>`;
+function closeFileViewer(){
+  if (!fileViewerEl) return;
+  const el = fileViewerEl;
+  fileViewerEl = null;
+  document.removeEventListener('keydown', fileViewerKeyHandler);
+  document.removeEventListener('fullscreenchange', fileViewerFsHandler);
+  document.removeEventListener('webkitfullscreenchange', fileViewerFsHandler);
+  if (fsElement() === el) {
+    try {
+      const p = (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+      if (p && p.catch) p.catch(() => {});
+    } catch (_) {}
   }
-  openDialog('preview-dialog');
+  el.remove();
+  document.body.style.overflow = '';
+  if (fileViewerOpener && fileViewerOpener.isConnected && fileViewerOpener.focus) fileViewerOpener.focus();
+  fileViewerOpener = null;
 }
 
-// Best-effort recovery of the original uploaded filename from the storage path convention
-// "<class_id>/<uuid>-<original filename>" (see the material upload code). Falls back to the
-// raw storage key, then to the material's display name, if the uuid prefix can't be matched —
-// no schema change/new column is needed for this, it's cosmetic only for the Download link.
-function materialFileName(m){
-  if (m.storagePath) {
-    const base = m.storagePath.split('/').pop();
-    const match = base.match(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}-(.+)$/);
-    if (match) return match[1];
-    if (base) return base;
-  }
-  return m.name;
-}
+async function openFileViewer({ title, fileName, mimeType, bucket, path }){
+  if (!supabase || !path) { toast('No file attached.'); return; }
+  if (fileViewerEl) closeFileViewer();
+  const type = (mimeType || '').toLowerCase();
+  const isImage = type.startsWith('image/');
+  const isPdf = type === 'application/pdf';
 
-function previewFullscreenTarget(){ return document.getElementById('preview-viewer'); }
-function fullscreenSupported(){
-  const el = previewFullscreenTarget();
-  const apiAvailable = !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
-  return apiAvailable && !!(el && (el.requestFullscreen || el.webkitRequestFullscreen));
-}
-function currentFullscreenElement(){ return document.fullscreenElement || document.webkitFullscreenElement || null; }
-function togglePreviewFullscreen(){
-  const target = previewFullscreenTarget();
-  if (!target) return;
-  if (currentFullscreenElement() === target) {
-    if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
-    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-  } else if (target.requestFullscreen) {
-    target.requestFullscreen().catch(err => console.error('Entering fullscreen failed:', err));
-  } else if (target.webkitRequestFullscreen) {
-    target.webkitRequestFullscreen();
+  // Touch device + PDF: open the file straight in a new tab. The tab is opened right away (inside
+  // the tap) and pointed at the signed URL afterwards, so popup blockers treat it as user-initiated.
+  if (isPdf && PDF_OPENS_IN_TAB_ON_TOUCH && window.matchMedia && window.matchMedia('(pointer: coarse)').matches) {
+    let tab = null;
+    try { tab = window.open('', '_blank'); } catch (_) { tab = null; }
+    if (tab) {
+      try {
+        const { data, error } = await supabase.storage.from(bucket).createSignedUrl(path, SIGNED_URL_TTL);
+        if (error) throw error;
+        tab.location.href = data.signedUrl;
+      } catch (err) {
+        console.error('Opening PDF failed:', err);
+        tab.close();
+        toast("Couldn't open this file. Please try again.");
+      }
+      return;
+    }
   }
-}
-function updatePreviewFullscreenLabel(){
-  const fsBtn = document.getElementById('preview-fullscreen-btn');
-  if (!fsBtn || fsBtn.style.display === 'none') return;
-  fsBtn.textContent = currentFullscreenElement() === previewFullscreenTarget() ? '⤢ Exit full screen' : '⛶ Full screen';
-}
-document.getElementById('preview-fullscreen-btn').addEventListener('click', togglePreviewFullscreen);
-document.addEventListener('fullscreenchange', updatePreviewFullscreenLabel);
-document.addEventListener('webkitfullscreenchange', updatePreviewFullscreenLabel);
-// Closing the dialog (× button, backdrop click, or Escape) shouldn't leave the browser stuck
-// in fullscreen on the now-hidden preview.
-document.getElementById('preview-dialog').addEventListener('close', () => {
-  if (currentFullscreenElement() === previewFullscreenTarget()) {
-    if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
-    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-  }
-});
 
-// Materials preview: the "materials" Storage bucket is private, so preview/download always goes
-// through short-lived signed URLs fetched fresh here — never a permanent/public link. Used by
-// both the student read-only view and the admin Materials panel. Images and PDFs render inside
-// this dialog (with full-screen + download controls); other file types fall back to a plain
-// download prompt, since there's nothing sensible to render inline for them.
-async function openMaterialPreview(m){
-  document.getElementById('preview-title').textContent = m.name;
-  const body = document.getElementById('preview-body');
-  const dialogEl = document.getElementById('preview-dialog');
-  const toolbar = document.getElementById('preview-toolbar');
-  const fsBtn = document.getElementById('preview-fullscreen-btn');
-  const dlBtn = document.getElementById('preview-download-btn');
-  dialogEl.classList.remove('wide');
-  toolbar.style.display = 'none';
-  fsBtn.style.display = 'none';
-  dlBtn.style.display = 'none';
-  body.innerHTML = `<p style="color:var(--ink-muted);">Loading preview…</p>`;
-  openDialog('preview-dialog');
+  fileViewerOpener = document.activeElement;
+  const el = document.createElement('div');
+  el.className = 'fs-viewer';
+  el.setAttribute('role', 'dialog');
+  el.setAttribute('aria-modal', 'true');
+  el.setAttribute('aria-label', title || fileName || 'File preview');
+  el.innerHTML = `
+    <div class="fs-bar">
+      <div class="fs-title">${esc(title || fileName || 'File')}</div>
+      <button type="button" class="fs-btn" data-fs-download style="display:none;">⬇ Download</button>
+      <button type="button" class="fs-btn" data-fs-close aria-label="Close">✕ Close</button>
+    </div>
+    <div class="fs-body"><p class="fs-msg">Loading…</p></div>`;
+  document.body.appendChild(el);
+  document.body.style.overflow = 'hidden';
+  fileViewerEl = el;
+
+  const closeBtn = el.querySelector('[data-fs-close]');
+  closeBtn.addEventListener('click', closeFileViewer);
+  fileViewerKeyHandler = (ev) => { if (ev.key === 'Escape') closeFileViewer(); };
+  document.addEventListener('keydown', fileViewerKeyHandler);
+  // If the browser leaves native full screen (Esc, swipe), close the viewer as well.
+  fileViewerFsHandler = () => { if (fileViewerEl && !fsElement()) closeFileViewer(); };
+  document.addEventListener('fullscreenchange', fileViewerFsHandler);
+  document.addEventListener('webkitfullscreenchange', fileViewerFsHandler);
+  // Native full screen where the browser supports it. iPhone Safari does not, but the overlay
+  // already fills the whole screen there.
+  const requestFs = el.requestFullscreen || el.webkitRequestFullscreen;
+  if (requestFs) {
+    try { const p = requestFs.call(el); if (p && p.catch) p.catch(() => {}); } catch (_) {}
+  }
+  closeBtn.focus();
+
+  const body = el.querySelector('.fs-body');
+  const dlBtn = el.querySelector('[data-fs-download]');
   try {
-    const filename = materialFileName(m);
-    const [viewRes, downloadRes] = await Promise.all([
-      supabase.storage.from(MATERIALS_BUCKET).createSignedUrl(m.storagePath, 300),
-      supabase.storage.from(MATERIALS_BUCKET).createSignedUrl(m.storagePath, 300, { download: filename })
-    ]);
-    if (viewRes.error) throw viewRes.error;
-    if (downloadRes.error) throw downloadRes.error;
-    const url = viewRes.data.signedUrl;
-
-    dlBtn.href = downloadRes.data.signedUrl;
-    dlBtn.setAttribute('download', filename);
-    dlBtn.style.display = '';
-    toolbar.style.display = 'flex';
-
-    const isImage = m.mimeType && m.mimeType.startsWith('image/');
-    const isPdf = m.mimeType === 'application/pdf';
+    const { data, error } = await supabase.storage.from(bucket).createSignedUrl(path, SIGNED_URL_TTL);
+    if (error) throw error;
+    if (fileViewerEl !== el) return;   // closed while loading
+    const url = esc(data.signedUrl);
+    const label = esc(fileName || title || 'File');
     if (isImage) {
-      dialogEl.classList.add('wide');
-      body.innerHTML = `<img src="${url}" alt="${esc(m.name)}">`;
+      body.innerHTML = `<img class="fs-media" src="${url}" alt="${label}">`;
     } else if (isPdf) {
-      dialogEl.classList.add('wide');
-      body.innerHTML = `<iframe src="${url}" class="pdf-frame" title="PDF preview"></iframe>`;
+      body.innerHTML = `<iframe class="fs-frame" src="${url}" title="${label}"></iframe>`;
     } else {
-      body.innerHTML = `<p style="color:var(--ink-muted);">${esc(m.name)}</p>
-        <p style="color:var(--ink-faint); font-size:13px;">Preview isn't available for this file type — use Download instead.</p>`;
+      body.innerHTML = `<div class="fs-msg"><div style="font-size:42px;margin-bottom:8px;">${fileIcon(mimeType)}</div><p>${label}</p><p>Preview isn't available for this file type. Use Download to open it.</p></div>`;
     }
-    if ((isImage || isPdf) && fullscreenSupported()) {
-      fsBtn.style.display = '';
-      updatePreviewFullscreenLabel();
-    }
+    dlBtn.style.display = '';
+    dlBtn.addEventListener('click', () => downloadStorageFile(bucket, path, fileName || title, dlBtn));
   } catch (err) {
-    console.error('Loading material preview failed:', err);
-    body.innerHTML = `<p style="color:var(--ink-muted);">Couldn't load this file. Please try again.</p>`;
-    toolbar.style.display = 'none';
+    console.error('Opening file failed:', err);
+    if (fileViewerEl !== el) return;
+    body.innerHTML = `<div class="fs-msg"><p>Couldn't open this file right now.</p><button type="button" class="fs-btn" data-fs-retry>Try again</button></div>`;
+    body.querySelector('[data-fs-retry]').addEventListener('click', () => {
+      closeFileViewer();
+      openFileViewer({ title, fileName, mimeType, bucket, path });
+    });
   }
+}
+
+// Download link is created only when Download is pressed (one signed URL, not two per preview).
+async function downloadStorageFile(bucket, path, fileName, btn){
+  if (!supabase || !path) return;
+  if (btn) btn.disabled = true;
+  try {
+    const { data, error } = await supabase.storage.from(bucket).createSignedUrl(path, SIGNED_URL_TTL, { download: fileName || true });
+    if (error) throw error;
+    const a = document.createElement('a');
+    a.href = data.signedUrl;
+    a.download = fileName || '';
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  } catch (err) {
+    console.error('Download failed:', err);
+    toast("Couldn't download the file. Please try again.");
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+function openTaskAttachment(t){
+  openFileViewer({ title: t.fileName || t.name, fileName: t.fileName || 'attachment', mimeType: t.fileType, bucket: TASKS_BUCKET, path: t.storagePath });
+}
+function openMaterialPreview(m){
+  openFileViewer({ title: m.name, fileName: fileNameFromStoragePath(m.storagePath, m.name), mimeType: m.mimeType, bucket: MATERIALS_BUCKET, path: m.storagePath });
+}
+function openTimetablePreview(t){
+  if (!t) return;
+  openFileViewer({ title: t.fileName || 'Timetable', fileName: t.fileName || 'timetable', mimeType: t.mimeType, bucket: TIMETABLE_BUCKET, path: normalizeTimetableStoragePath(t.storagePath) });
 }
 
 /* ============================== PUSH / NOTIFICATION CENTER ============================== */
@@ -5188,10 +5007,6 @@ async function enablePushNotifications(){
     toast('Push notifications require HTTPS and a supported browser.');
     return;
   }
-  if (!VAPID_PUBLIC_KEY || VAPID_PUBLIC_KEY.startsWith('REPLACE_')) {
-    toast('Push notifications are not configured yet.');
-    return;
-  }
   try {
     const permission = await Notification.requestPermission();
     if (permission !== 'granted') { render(); return; }
@@ -5211,7 +5026,6 @@ async function enablePushNotifications(){
 
 async function syncExistingPushSubscription(){
   if (!state.authed || state.role === 'admin' || !('serviceWorker' in navigator) || !('PushManager' in window)) return;
-  if (!VAPID_PUBLIC_KEY || VAPID_PUBLIC_KEY.startsWith('REPLACE_')) return;
   try {
     const reg = await registerPushServiceWorker();
     const sub = await reg.pushManager.getSubscription();
@@ -5379,17 +5193,9 @@ async function checkPersonalNotifications(){
   }
 }
 
-// Shared class notifications are delivered by Web Push. Personal notifications remain
-// device-local and are checked while this app is active, never sent to Supabase.
-async function checkReminderNotifications(){ return checkPersonalNotifications(); }
 
 /* ============================== CONTENT EVENT BINDING ============================== */
 function bindContentEvents(){
-  // Home
-  document.querySelectorAll('[data-route-to]').forEach(row => {
-    row.addEventListener('click', () => { location.hash = '#/' + row.dataset.routeTo; });
-  });
-
   // Home dashboard quick-access cards — each opens its own dedicated page, Profile included.
   document.querySelectorAll('#home-card-grid [data-home-section]').forEach(btn => {
     btn.addEventListener('click', () => { location.hash = '#/' + btn.dataset.homeSection; });
@@ -5542,10 +5348,10 @@ function bindContentEvents(){
 
   document.querySelectorAll('.item-card[data-kind="material"]').forEach(card => {
     const id = card.dataset.id;
-    const thumb = card.querySelector('[data-action="preview-material"]');
-    if (thumb) thumb.addEventListener('click', () => {
+    const cardBody = card.querySelector('.body');
+    if (cardBody) cardBody.addEventListener('click', () => {
       const m = state.materials.find(x => x.id === id);
-      openMaterialPreview(m);
+      if (m) openMaterialPreview(m);
     });
   });
 
@@ -5553,6 +5359,12 @@ function bindContentEvents(){
   document.querySelectorAll('[data-action="preview-timetable"]').forEach(btn => {
     btn.addEventListener('click', () => {
       if (state.timetable) openTimetablePreview(state.timetable);
+    });
+  });
+  document.querySelectorAll('[data-action="download-timetable"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const t = state.timetable;
+      if (t) downloadStorageFile(TIMETABLE_BUCKET, normalizeTimetableStoragePath(t.storagePath), t.fileName, btn);
     });
   });
 
@@ -5642,6 +5454,7 @@ document.getElementById('admin-panel').addEventListener('click', (e) => {
   if (action === 'add') openAddAdminTimetableDialog();
   else if (action === 'replace') openReplaceAdminTimetableDialog();
   else if (action === 'preview' && state.adminTimetable) openTimetablePreview(state.adminTimetable);
+  else if (action === 'download' && state.adminTimetable) downloadStorageFile(TIMETABLE_BUCKET, normalizeTimetableStoragePath(state.adminTimetable.storagePath), state.adminTimetable.fileName, btn);
   else if (action === 'delete') confirmDeleteAdminTimetable();
   else if (action === 'retry') loadAdminTimetable();
 });
@@ -5666,18 +5479,9 @@ document.addEventListener('visibilitychange', async () => {
   ]);
   if (state.authed && state.role !== 'admin') render();
 });
-// Wipe admin data from the DOM whenever the session ends (logout or expiry).
-// Separate subscription: the existing auth handlers are left as they were.
-if (supabase) {
-  supabase.auth.onAuthStateChange((event) => {
-    if (event === 'SIGNED_OUT') { adminLoadToken++; setAdminView('loading'); }
-  });
-}
-
 /* ============================== THEME ============================== */
 function setTheme(theme){
   const isDark = theme === 'dark';
-  document.documentElement.toggleAttribute('data-theme', isDark);
   if (isDark) document.documentElement.setAttribute('data-theme', 'dark');
   else document.documentElement.removeAttribute('data-theme');
   try { localStorage.setItem('coursework-theme', isDark ? 'dark' : 'light'); } catch (_) {}
@@ -5696,47 +5500,8 @@ setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark'
 
 /* ============================== INIT ============================== */
 async function init(){
-  const [tasks, worksheets, profiles, metas] = await Promise.all([
-    dbAll('tasks'), dbAll('worksheets'), dbAll('profile'), dbAll('meta')
-  ]);
-  state.tasks = [];   // class tasks now come from Supabase after login; the old local copies are left untouched in IndexedDB
-  state.reminders = [];   // class reminders now come from Supabase after login (see loadStudentReminders); the old local IndexedDB "reminders" store is no longer read
-  state.materials = [];   // class materials now come from Supabase after login (see loadStudentMaterials); the old local IndexedDB "materials" store is no longer read
-  state.folders = [];     // class material folders now come from Supabase after login; the old local IndexedDB "folders" store is no longer read
-  state.events = [];      // class events now come from Supabase after login (see loadStudentEvents); the old local IndexedDB "events" store is no longer read
-  state.timetable = null; // class timetable now comes from Supabase after login (see loadStudentTimetable); the old local IndexedDB "timetable" store is no longer read
-  state.myTasks = [];     // personal tasks now come from Supabase after login (see loadPersonalTasks); any old local copies are migrated once (see migrateLocalPersonalItemsToAccount) then left untouched in IndexedDB
-  state.myReminders = []; // personal reminders now come from Supabase after login (see loadPersonalReminders); any old local copies are migrated once (see migrateLocalPersonalItemsToAccount) then left untouched in IndexedDB
-  if (profiles && profiles.length) state.profile = { ...state.profile, ...profiles[0] };
-
-  // One-time migration: fold legacy worksheets into the merged Tasks list
-  const migrated = metas.find(m => m.id === 'migration_worksheets_v1');
-  if (!migrated) {
-    for (const w of worksheets) {
-      const merged = {
-        id: w.id,
-        name: w.name,
-        subject: w.subject,
-        description: '',
-        dueDate: w.dueDate,
-        dueTime: '',
-        notes: w.notes || '',
-        fileName: w.fileName || '',
-        fileType: w.fileType || '',
-        fileData: w.fileData || '',
-        completed: w.completed,
-        completedDate: w.completedDate,
-        createdAt: w.createdAt
-      };
-      await dbPut('tasks', merged);
-      await dbDelete('worksheets', w.id);
-    }
-    await dbPut('meta', { id: 'migration_worksheets_v1', done: true });
-  }
-
   bindNotificationCenter();
-  checkReminderNotifications();
-  setInterval(checkReminderNotifications, 30 * 60 * 1000);
+  setInterval(checkPersonalNotifications, 30 * 60 * 1000);
 
   state.route = currentRouteFromHash();
   if (!location.hash) location.hash = '#/home';
@@ -5756,6 +5521,8 @@ async function init(){
 
   supabase.auth.onAuthStateChange((event) => {
     if (event === 'SIGNED_OUT') {
+      // Wipe admin data from the DOM whenever the session ends (logout or expiry).
+      adminLoadToken++; setAdminView('loading');
       if (notificationPollTimer) { clearInterval(notificationPollTimer); notificationPollTimer = null; }
       showLoginScreen();
     }
